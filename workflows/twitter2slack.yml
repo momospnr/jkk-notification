@@ -30,4 +30,4 @@ jobs:
         with:
           args: |
             JKK空室情報: ${{ on.twitter.outputs.full_text }}
-            Go to Twitter: https://twitter.com/jkkwatcher/status/${{ on.twitter.outputs.id }}
+            Go to Twitter: https://twitter.com/jkkwatcher/status/${{ on.twitter.outputs.id_str }}
