@@ -1,5 +1,6 @@
 const http = require("http");
 const httpProxy = require("http-proxy");
+const waitPort = require("wait-port");
 const proxy = httpProxy.createProxyServer({});
 
 const server = http.createServer(function (req, res) {
@@ -7,5 +8,15 @@ const server = http.createServer(function (req, res) {
 });
 
 const port = process.env.PORT || "5000";
-server.listen(port);
-console.log(`listening on ${port}`);
+
+waitPort({
+  host: "0.0.0.0",
+  port: 5678
+}).then(function (open) {
+  if (open) {
+    server.listen(port);
+    console.log(`listening on ${port}`);
+  }
+}).catch(function (err) {
+  console.log(err);
+});
