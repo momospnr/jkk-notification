@@ -1,0 +1,208 @@
+{
+  "name": "jkkwatcher",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        367,
+        299
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "searchText": "from:@jkkwatcher",
+        "additionalFields": {}
+      },
+      "name": "Twitter",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 1,
+      "position": [
+        567,
+        519
+      ],
+      "credentials": {
+        "twitterOAuth1Api": "jkkwatcher"
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Twitter\"].json[\"text\"]}}",
+              "operation": "contains",
+              "value2": "#JKK空室"
+            }
+          ],
+          "number": [
+            {
+              "value1": "={{$node[\"Date & Time1\"].json[\"formated_created_at\"]}}",
+              "operation": "largerEqual",
+              "value2": "={{$node[\"Date & Time1\"].json[\"formated_now\"]}}"
+            }
+          ]
+        }
+      },
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1317,
+        519
+      ]
+    },
+    {
+      "parameters": {
+        "webhookUri": "",
+        "text": "={{$node[\"Twitter\"].json[\"text\"]}}\nGo to Twitter: https://twitter.com/{{$node[\"Twitter\"].json[\"user\"][\"name\"]}}/status/{{$node[\"Twitter\"].json[\"id_str\"]}}"
+      },
+      "name": "Discord",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 1,
+      "position": [
+        1497,
+        379
+      ]
+    },
+    {
+      "parameters": {
+        "value": "={{$node[\"Twitter\"].json[\"created_at\"]}}",
+        "dataPropertyName": "formated_created_at",
+        "toFormat": "x",
+        "options": {
+          "toTimezone": "Asia/Tokyo"
+        }
+      },
+      "name": "Date & Time",
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 1,
+      "position": [
+        747,
+        519
+      ]
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "unit": "minutes"
+            }
+          ]
+        }
+      },
+      "name": "Cron",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        367,
+        519
+      ]
+    },
+    {
+      "parameters": {
+        "value": "={{$node[\"Function\"].json[\"now\"]}}",
+        "dataPropertyName": "formated_now",
+        "toFormat": "x",
+        "options": {
+          "toTimezone": "Asia/Tokyo"
+        }
+      },
+      "name": "Date & Time1",
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 1,
+      "position": [
+        1130,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "var date = new Date();\nvar minute = date.getMinutes() - 4;\ndate.setMinutes(minute);\nitems.forEach(function(item){\n  item.json.now = date;\n});\nreturn items;"
+      },
+      "name": "Function",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        937,
+        519
+      ]
+    }
+  ],
+  "connections": {
+    "Twitter": {
+      "main": [
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Function",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron": {
+      "main": [
+        [
+          {
+            "node": "Twitter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time1": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function": {
+      "main": [
+        [
+          {
+            "node": "Date & Time1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "id": "1"
+}
